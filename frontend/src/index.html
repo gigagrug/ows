@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link href="assets/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <app-shell>
+      <form onsubmit="createProject()" class="flex items-center mx-auto mb-3">
+        <input id="projectName" type="text" class="text-gray-900 text-sm rounded-lg block w-full p-2" placeholder="Create Project" />
+        <button type="submit" class="inline-flex items-center py-2 px-3 ms-2 text-sm text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+      </form>
+      <div id="projectList" class="grid grid-cols-4 gap-4"></div>
+    </app-shell>
+    <script src="assets/shell.js"></script>
+    <script>
+      const url = "http://localhost:8000/api"
+      let retryCount = 0
+
+      async function getProjects() {
+        try {
+          const response = await fetch(url + "/project/getProjects/", {
+            credentials: "include"
+          })
+          const project = await response.json()
+          console.log(project)
+          const projectList = document.getElementById("projectList")
+          if (project) {
+            projectList.innerHTML = ""
+            project.forEach((project) => {
+              projectList.innerHTML += `
+								<div>
+									<a href="/project?projectId=${project.id}" class="text-center block p-2 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+										<h5 class="text-2xl font-bold tracking-tight c-text">${project.name}</h5>
+									</a>
+								</div>
+							`
+            })
+          }
+        } catch (error) {
+          console.error(error)
+          if (retryCount < 5) {
+            retryCount++
+            setTimeout(getProjects, 1000)
+          } else {
+            console.error("Maximum retry attempts reached")
+          }
+        }
+      }
+      getProjects()
+      async function createProject() {
+        event.preventDefault()
+        const projectName = document.getElementById("projectName").value
+        try {
+          const response = await fetch(url + "/project/createProject/", {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify({
+              name: projectName
+            })
+          })
+          if (response.ok) {
+            getProjects()
+          } else {
+            console.error("Error creating project:", await response.text())
+          }
+        } catch (error) {
+          console.error(error)
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link href="assets/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <app-shell>
+      <div class="flex justify-around">
+        <div></div>
+        <div>
+          <h1 id="projectTitle" class="text-center"></h1>
+          <form id="formProject" onsubmit="updateProject()" class="flex hidden">
+            <input id="projectName" type="text" class="text-gray-900 text-sm rounded-lg block w-full p-2" placeholder="Update Project" />
+            <button type="submit" class="inline-flex items-center py-2 px-3 ms-2 text-sm text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+          </form>
+        </div>
+        <div>
+          <div class="relative inline-block text-left">
+            <button id="dropdownMenuIconHorizontalButton" class="c-text inline-flex items-center p-2 text-sm font-medium text-center rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button" aria-haspopup="true" aria-expanded="false">
+              <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
+                <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+              </svg>
+            </button>
+
+            <div id="dropdownDotsHorizontal" class="z-10 hidden origin-top-right absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600" role="menu" aria-orientation="vertical" aria-labelledby="dropdownMenuIconHorizontalButton" tabindex="-1">
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                <li>
+                  <a onclick="editProject()" href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Update</a>
+                </li>
+                <li>
+                  <a onclick="deleteProject()" href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Delete</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-shell>
+    <script src="assets/shell.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const dropdownButton = document.getElementById("dropdownMenuIconHorizontalButton")
+        const dropdownMenu = document.getElementById("dropdownDotsHorizontal")
+
+        dropdownButton.addEventListener("click", function () {
+          const isExpanded = dropdownButton.getAttribute("aria-expanded") === "true"
+          dropdownButton.setAttribute("aria-expanded", !isExpanded)
+          dropdownMenu.classList.toggle("hidden")
+        })
+
+        document.addEventListener("click", function (event) {
+          if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownButton.setAttribute("aria-expanded", "false")
+            dropdownMenu.classList.add("hidden")
+          }
+        })
+      })
+
+      function getUrlParameter(name) {
+        const regex = new RegExp("[?]" + name + "=([^&#]*)")
+        const results = regex.exec(window.location.search)
+        return results ? decodeURIComponent(results[1].replace(/\+/g, " ")) : ""
+      }
+
+      const url = "http://localhost:8000/api"
+      const projectId = getUrlParameter("projectId")
+      let retryCount = 0
+
+      async function getProject() {
+        try {
+          const response = await fetch(url + `/project/getProject/${projectId}/`, {
+            credentials: "include"
+          })
+          const project = await response.json()
+          const projectTitle = document.getElementById("projectTitle")
+          projectTitle.innerHTML = `${project.name}`
+          console.log(project)
+        } catch (error) {
+          console.error(error)
+          if (retryCount < 5) {
+            retryCount++
+            setTimeout(getProject, 1000)
+          } else {
+            console.error("Maximum retry attempts reached")
+          }
+        }
+      }
+      getProject()
+
+      function editProject(projectId) {
+        const inputField = document.getElementById("projectTitle")
+        inputField.classList.toggle("hidden")
+        const formProject = document.getElementById("formProject")
+        formProject.classList.toggle("hidden")
+      }
+
+      async function updateProject() {
+        if (window.confirm("Are you sure you want to update project?")) {
+          event.preventDefault()
+          try {
+            const name = document.getElementById("projectName").value
+            const response = await fetch(url + `/project/updateProject/${projectId}/`, {
+              method: "PUT",
+              credentials: "include",
+              body: JSON.stringify({
+                name: name
+              })
+            })
+            if (response.ok) {
+              location.reload()
+            } else {
+              console.error("Error updating project:", await response.text())
+            }
+          } catch (error) {
+            console.error(error)
+          }
+        }
+      }
+
+      async function deleteProject() {
+        if (window.confirm("Are you sure you want to delete project?")) {
+          try {
+            const response = await fetch(url + `/project/deleteProject/${projectId}/`, {
+              method: "DELETE",
+              credentials: "include"
+            })
+            if (response.ok) {
+              window.location.href = "/"
+            } else {
+              console.error("Error deleting project:", await response.text())
+            }
+          } catch (error) {
+            console.error(error)
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
