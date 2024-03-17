@@ -5,11 +5,11 @@ class Shell extends HTMLElement {
     this.shadowRoot.innerHTML = `
 			<link href="./assets/style.css" rel="stylesheet" />
 
-			<div id="wrap" class="">
-				<nav class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-[#1b1b1f] dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
+			<div id="wrap">
+				<nav class="bg-white border-b border-neutral-200 px-4 py-2.5 dark:bg-neutral-800 dark:border-neutral-700 fixed left-0 right-0 top-0 z-50">
 					<div class="flex flex-wrap justify-between items-center">
 						<div class="flex justify-start items-center">
-							<button id="openDrawer" aria-controls="drawer-navigation" class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer md:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+							<button id="openDrawer" aria-controls="drawer-navigation" class="p-2 mr-2 text-neutral-600 rounded-lg cursor-pointer md:hidden hover:text-neutral-900 hover:bg-neutral-100 focus:bg-neutral-100 dark:focus:bg-neutral-700 focus:ring-2 focus:ring-neutral-100 dark:focus:ring-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white">
 								<svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 									<path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
 								</svg>
@@ -30,13 +30,13 @@ class Shell extends HTMLElement {
 				</nav>
 
 				<!-- Sidebar -->
-				<aside id="sideDrawer" class="fixed top-0 left-0 z-40 w-52 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-[#1b1b1f] dark:border-gray-700" aria-label="Sidenav" id="drawer-navigation">
-					<div class="overflow-y-auto py-5 px-3 h-full dark:bg-[#1b1b1f]">
-						<a href="/" class="flex items-center p-2 font-medium c-text rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+				<aside id="sideDrawer" class="fixed top-0 left-0 z-40 w-52 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-neutral-200 md:translate-x-0 dark:bg-neutral-800 dark:border-neutral-700" aria-label="Sidenav" id="drawer-navigation">
+					<div class="overflow-y-auto py-5 px-3 h-full">
+						<a href="/" class="flex items-center p-2 font-medium c-text rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700">
 							<span class="ml-3">Home</span>
 						</a>
 						<hr class="c-border border-0 border-t"/>
-						<a href="/account" class="flex items-center p-2 font-medium c-text rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+						<a href="/account" class="flex items-center p-2 font-medium c-text rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700">
 							<span class="ml-3">Account</span>
 						</a>				
 					</div>
@@ -59,11 +59,11 @@ class Shell extends HTMLElement {
 
     const isDarkMode = localStorage.getItem("darkMode")
     const wrap = this.shadowRoot.getElementById("wrap")
+    const htmlTag = document.documentElement
     const toggleSwitch = this.shadowRoot.querySelector("#darkModeToggle")
     if (isDarkMode === "true") {
       wrap.classList.add("dark")
-      document.body.classList.add("dark")
-      document.body.style.backgroundColor = "#1b1b1f"
+      htmlTag.classList.add("dark")
       if (toggleSwitch) {
         toggleSwitch.checked = true
       }
@@ -72,13 +72,11 @@ class Shell extends HTMLElement {
       toggleSwitch.addEventListener("change", function () {
         if (this.checked) {
           wrap.classList.add("dark")
-          document.body.classList.add("dark")
-          document.body.style.backgroundColor = "#1b1b1f"
+          htmlTag.classList.add("dark")
           localStorage.setItem("darkMode", "true")
         } else {
           wrap.classList.remove("dark")
-          document.body.classList.remove("dark")
-          document.body.style.backgroundColor = "#ffffff"
+          htmlTag.classList.remove("dark")
           localStorage.setItem("darkMode", "false")
         }
       })
