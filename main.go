@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"ows/api/auth"
+	"ows/api/logging"
 	"ows/api/project"
 	"ows/model"
 	"time"
@@ -37,6 +38,14 @@ func main() {
 	mux.HandleFunc("POST /api/project/createProject/{$}", Chain(project.CreateProjects, AuthCheck(db)))
 	mux.HandleFunc("PUT /api/project/updateProject/{projectId}/{$}", Chain(project.UpdateProjects, AuthCheck(db)))
 	mux.HandleFunc("DELETE /api/project/deleteProject/{projectId}/{$}", Chain(project.DeleteProjects, AuthCheck(db)))
+
+	logging := &logging.DB{DB: db}
+	// Logging Service
+	mux.HandleFunc("GET /api/logService/getLogServices/{$}", Chain(logging.GetLogServices, AuthCheck(db)))
+	mux.HandleFunc("GET /api/logService/getLogService/{logServiceId}/{$}", Chain(logging.GetLogService, AuthCheck(db)))
+	mux.HandleFunc("POST /api/logService/createLogService/{$}", Chain(logging.CreateLogService, AuthCheck(db)))
+	mux.HandleFunc("PUT /api/logService/updateLogService/{logServiceId}/{$}", Chain(logging.PutLogService, AuthCheck(db)))
+	mux.HandleFunc("DELETE /api/logService/deleteLogService/{logServiceId}/{$}", Chain(logging.DeleteLogService, AuthCheck(db)))
 
 	if err := http.ListenAndServe(os.Getenv("PORT"), middleware(mux)); err != nil {
 		log.Fatal(err)

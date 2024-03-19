@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link href="assets/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <app-shell>
+      <form id="projectForm" onsubmit="createLogService()" class="mx-auto mb-3 flex items-center">
+        <input id="projectName" type="text" class="block w-full rounded-lg p-2 text-sm text-neutral-900" placeholder="Create log service" />
+        <button type="submit" class="ms-2 inline-flex items-center rounded-lg border border-blue-700 bg-blue-700 px-3 py-2 text-sm text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+      </form>
+      <div id="logServiceList" class="grid grid-cols-1 gap-4 md:grid-cols-4"></div>
+    </app-shell>
+    <script src="assets/shell.js"></script>
+    <script>
+      const url = "http://localhost:8000/api"
+      let retryCount = 0
+
+      async function getLogServices() {
+        try {
+          const response = await fetch(url + "/logService/getLogServices/", {
+            credentials: "include",
+          })
+          const logServices = await response.json()
+          console.log(logServices)
+          const logServiceList = document.getElementById("logServiceList")
+          if (logServices) {
+            logServiceList.innerHTML = ""
+            logServices.forEach((logService) => {
+              logServiceList.innerHTML += `
+								<div>
+									<a href="/log?logServiceId=${logService.id}" class="text-center c-border block p-2 rounded-lg hover:bg-neutral-100 dark:bg-neutral-800 dark:hover:bg-neutral-800">
+										<h5 class="text-2xl font-bold tracking-tight c-text">${logService.name}</h5>
+									</a>
+								</div>
+							`
+            })
+          }
+        } catch (error) {
+          console.error(error)
+          if (retryCount < 5) {
+            retryCount++
+            setTimeout(getLogServices, 1000)
+          } else {
+            console.error("Maximum retry attempts reached")
+          }
+        }
+      }
+      getLogServices()
+      async function createLogService() {
+        event.preventDefault()
+        const projectName = document.getElementById("projectName").value
+        try {
+          const response = await fetch(url + "/logService/createLogService/", {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify({
+              name: projectName,
+              projectId: "7555d1ef-cae5-4717-9f49-00d8aa0d8492",
+            }),
+          })
+          if (response.ok) {
+            getLogServices()
+            document.getElementById("projectForm").reset()
+          } else {
+            console.error("Error creating project:", await response.text())
+          }
+        } catch (error) {
+          console.error(error)
+        }
+      }
+    </script>
+  </body>
+</html>

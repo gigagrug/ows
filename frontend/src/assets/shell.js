@@ -35,6 +35,9 @@ class Shell extends HTMLElement {
 						<a href="/" class="flex items-center p-2 font-medium c-text rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700">
 							<span class="ml-3">Home</span>
 						</a>
+						<a href="/logs" class="flex items-center p-2 font-medium c-text rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700">
+							<span class="ml-3">Logs</span>
+						</a>
 						<hr class="c-border border-0 border-t"/>
 						<a href="/account" class="flex items-center p-2 font-medium c-text rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700">
 							<span class="ml-3">Account</span>

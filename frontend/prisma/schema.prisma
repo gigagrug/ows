@@ -8,18 +8,45 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email      String    @unique
-  password   String
-  created_at DateTime  @default(now())
-  Projects   Project[]
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email       String       @unique
+  password    String
+  created_at  DateTime     @default(now())
+  Projects    Project[]
+  LogServices LogService[]
+  Logs        Log[]
 }
 
 model Project {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String       @db.VarChar(20)
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  LogService LogService[]
+  User       User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    String       @db.Uuid
+}
+
+model LogService {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name       String   @db.VarChar(20)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Logs       Log[]
+  User       User     @relation(fields: [user_id], references: [id])
   user_id    String   @db.Uuid
+  Project    Project  @relation(fields: [project_id], references: [id])
+  project_id String   @db.Uuid
+}
+
+model Log {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  timestamp      DateTime   @default(now())
+  severity       String
+  message        String
+  info           String
+  LogService     LogService @relation(fields: [log_service_id], references: [id])
+  log_service_id String     @db.Uuid
+  User           User       @relation(fields: [user_id], references: [id])
+  user_id        String     @db.Uuid
 }

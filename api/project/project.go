@@ -117,6 +117,13 @@ func (db *DB) UpdateProjects(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error getting json data", http.StatusBadRequest)
 	}
 
+	validate := validator.New()
+	if err := validate.Struct(&project); err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "name not inputed", http.StatusInternalServerError)
+		return
+	}
+
 	_, err := db.Exec(`UPDATE "Project" SET name = $1, updated_at = $2 WHERE id = $3 AND user_id = $4`, project.Name, time.Now(), id, user)
 	if err != nil {
 		slog.Error(err.Error())

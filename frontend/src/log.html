@@ -11,9 +11,9 @@
       <div class="flex justify-around">
         <div></div>
         <div>
-          <h1 id="projectTitle" class="text-center"></h1>
-          <form id="formProject" onsubmit="updateProject()" class="flex hidden">
-            <input id="projectName" type="text" class="block w-full rounded-lg p-2 text-sm text-neutral-900" placeholder="Update Project" />
+          <h1 id="titleLogService" class="text-center"></h1>
+          <form id="formLogService" onsubmit="updateLogService()" class="flex hidden">
+            <input id="nameLogService" type="text" class="block w-full rounded-lg p-2 text-sm text-neutral-900" placeholder="Update Project" />
             <button type="submit" class="ms-2 inline-flex items-center rounded-lg border border-blue-700 bg-blue-700 px-3 py-2 text-sm text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
           </form>
         </div>
@@ -28,10 +28,10 @@
             <div id="dropdownDotsHorizontal" class="absolute right-0 z-10 mt-2 hidden w-44 origin-top-right divide-y divide-neutral-100 rounded-lg bg-white shadow dark:divide-neutral-600 dark:bg-neutral-800" role="menu" aria-orientation="vertical" aria-labelledby="dropdownMenuIconHorizontalButton" tabindex="-1">
               <ul class="py-2 text-sm text-neutral-700 dark:text-neutral-200">
                 <li>
-                  <a onclick="editProject()" href="#" class="block px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-600 dark:hover:text-white">Update</a>
+                  <a onclick="editLogService()" href="#" class="block px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-600 dark:hover:text-white">Update</a>
                 </li>
                 <li>
-                  <a onclick="deleteProject()" href="#" class="block px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-600 dark:hover:text-white">Delete</a>
+                  <a onclick="deleteLogService()" href="#" class="block px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-600 dark:hover:text-white">Delete</a>
                 </li>
               </ul>
             </div>
@@ -66,46 +66,45 @@
       }
 
       const url = "http://localhost:8000/api"
-      const projectId = getUrlParameter("projectId")
+      const logServiceId = getUrlParameter("logServiceId")
       let retryCount = 0
 
-      async function getProject() {
+      async function getLogService() {
         try {
-          const response = await fetch(url + `/project/getProject/${projectId}/`, {
+          const response = await fetch(url + `/logService/getLogService/${logServiceId}/`, {
             credentials: "include",
           })
-          const project = await response.json()
-          console.log(project.name)
-          const projectTitle = document.getElementById("projectTitle")
-          const projectName = document.getElementById("projectName")
-          projectTitle.innerHTML = `${project.name}`
-          projectName.value = project.name
-          console.log(project)
+          const logService = await response.json()
+          console.log(logService)
+          const titleLogService = document.getElementById("titleLogService")
+          const nameLogService = document.getElementById("nameLogService")
+          titleLogService.innerHTML = `${logService.name}`
+          nameLogService.value = logService.name
         } catch (error) {
           console.error(error)
           if (retryCount < 5) {
             retryCount++
-            setTimeout(getProject, 1000)
+            setTimeout(getLogService, 1000)
           } else {
             console.error("Maximum retry attempts reached")
           }
         }
       }
-      getProject()
+      getLogService()
 
-      function editProject(projectId) {
-        const inputField = document.getElementById("projectTitle")
+      function editLogService(projectId) {
+        const inputField = document.getElementById("titleLogService")
         inputField.classList.toggle("hidden")
-        const formProject = document.getElementById("formProject")
-        formProject.classList.toggle("hidden")
+        const formLogService = document.getElementById("formLogService")
+        formLogService.classList.toggle("hidden")
       }
 
-      async function updateProject() {
+      async function updateLogService() {
         event.preventDefault()
-        if (window.confirm("Are you sure you want to update project?")) {
+        if (window.confirm("Are you sure you want to update log service?")) {
           try {
-            const name = document.getElementById("projectName").value
-            const response = await fetch(url + `/project/updateProject/${projectId}/`, {
+            const name = document.getElementById("nameLogService").value
+            const response = await fetch(url + `/logService/updateLogService/${logServiceId}/`, {
               method: "PUT",
               credentials: "include",
               body: JSON.stringify({
@@ -123,15 +122,15 @@
         }
       }
 
-      async function deleteProject() {
-        if (window.confirm("Are you sure you want to delete project?")) {
+      async function deleteLogService() {
+        if (window.confirm("Are you sure you want to delete log service?")) {
           try {
-            const response = await fetch(url + `/project/deleteProject/${projectId}/`, {
+            const response = await fetch(url + `/logService/deleteLogService/${logServiceId}/`, {
               method: "DELETE",
               credentials: "include",
             })
             if (response.ok) {
-              window.location.href = "/"
+              window.location.href = "/logs"
             } else {
               console.error("Error deleting project:", await response.text())
             }
