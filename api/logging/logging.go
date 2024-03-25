@@ -148,3 +148,82 @@ func (db *DB) DeleteLogService(w http.ResponseWriter, r *http.Request) {
 
 	slog.Info("delete log services")
 }
+
+// Logging
+func (db *DB) GetLogs(w http.ResponseWriter, r *http.Request) {
+	var log model.Log
+	user := r.Context().Value("key").(string)
+
+	rows, err := db.Query(`SELECT id, timestamp, severity, message, info, log_service_id, user_id FROM "Log" WHERE user_id = $1 ORDER BY timestamp ASC`, user)
+	if err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "error getting projects", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	logs := []model.Log{}
+	for rows.Next() {
+		if err := rows.Scan(&log.ID, &log.Timestamp, &log.Severity, &log.Message, &log.Info, &log.LogServiceID, &log.UserID); err != nil {
+			slog.Error(err.Error())
+			http.Error(w, "error getting project", http.StatusInternalServerError)
+			return
+		}
+		logs = append(logs, log)
+	}
+
+	jsonData, err := json.Marshal(logs)
+	if err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "error getting projects", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(jsonData)
+	if err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "error sending projects", http.StatusInternalServerError)
+		return
+	}
+
+	slog.Info("get logs")
+}
+
+func (db *DB) CreateLog(w http.ResponseWriter, r *http.Request) {
+	var log model.Log
+	user := r.Context().Value("key").(string)
+
+	if err := json.NewDecoder(r.Body).Decode(&log); err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "error getting json data", http.StatusBadRequest)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(&log); err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "name not inputed", http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := db.Exec(`INSERT INTO "Log" (timestamp, severity, message, info, log_service_id, user_id) VALUES ($1, $2, $3, $4, $5, $6)`, time.Now(), log.Severity, log.Message, log.Info, log.LogServiceID, user); err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "error creating project", http.StatusInternalServerError)
+		return
+	}
+
+	slog.Info("create log")
+}
+
+func (db *DB) DeleteLog(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("logId")
+	user := r.Context().Value("key").(string)
+
+	_, err := db.Exec(`DELETE FROM "Log" WHERE id = $1 AND user_id = $2`, id, user)
+	if err != nil {
+		slog.Error(err.Error())
+		http.Error(w, "error deleting project", http.StatusInternalServerError)
+		return
+	}
+
+	slog.Info("delete log")
+}

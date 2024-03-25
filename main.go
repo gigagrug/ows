@@ -46,6 +46,10 @@ func main() {
 	mux.HandleFunc("POST /api/logService/createLogService/{$}", Chain(logging.CreateLogService, AuthCheck(db)))
 	mux.HandleFunc("PUT /api/logService/updateLogService/{logServiceId}/{$}", Chain(logging.PutLogService, AuthCheck(db)))
 	mux.HandleFunc("DELETE /api/logService/deleteLogService/{logServiceId}/{$}", Chain(logging.DeleteLogService, AuthCheck(db)))
+	// Logs
+	mux.HandleFunc("GET /api/log/getLogs/{$}", Chain(logging.GetLogs, AuthCheck(db)))
+	mux.HandleFunc("POST /api/log/createLog/{$}", Chain(logging.CreateLog, AuthCheck(db)))
+	mux.HandleFunc("DELETE /api/log/deleteLog/{logId}/{$}", Chain(logging.DeleteLog, AuthCheck(db)))
 
 	if err := http.ListenAndServe(os.Getenv("PORT"), middleware(mux)); err != nil {
 		log.Fatal(err)
